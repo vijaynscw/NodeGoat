@@ -1,0 +1,53 @@
+name: $(Date:yyyyMMdd)-nodegoat-scan
+
+# schedules:
+#  - cron: "0 11 * * *"
+#    displayName: Daily 10 pm Sydney time Veracode Scan
+#    branches:
+#      include:
+#      - master
+#    always: true
+
+trigger:
+  - master
+  
+jobs:
+- job: 'VercodeScan'
+  displayName: 'Veracode NodeGoat Static Scan'
+  timeoutInMinutes: 240
+  steps:
+    - script: |
+        set -e
+        git config --global user.email "scwveracode@securecodewarrior.com.au"
+        git config --global user.name "SCWVeracode"
+        git clone https://$(GITHUBTOKEN)@github.com/vijaynscw/NodeGoat.git --branch master
+    - task: Bash@3
+      inputs:
+        targetType: 'inline'
+        script: |
+          #!/usr/bin/env bash
+          NOW=$(date '+%d %b %Y') 
+          SCAN_NAME="$NOW Static"
+          echo "##vso[task.setvariable variable=SCAN_NAME;]$SCAN_NAME"
+    - task: ArchiveFiles@2
+      inputs:
+        rootFolderOrFile: 'NodeGoat'
+        includeRootFolder: true
+        archiveType: 'zip'
+        archiveFile: 'NodeGoat-veracode-scan.zip'
+        replaceExistingArchive: true
+    - task: Veracode@2
+      inputs:
+        ConnectionDetailsSelection: 'Endpoint'
+        AnalysisService: 'SCW Veracode'
+        veracodeAppProfile: 'Test App Profile'
+        version: '$(SCAN_NAME)'
+        filepath: 'NodeGoat-veracode-scan.zip'
+        createSandBox: false
+        createProfile: false
+        scanStatusCheckInterval: '60'
+        importResults: true
+        failBuildOnPolicyFail: true
+
+
+    
