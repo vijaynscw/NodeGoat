@@ -10,7 +10,7 @@ name: $(Date:yyyyMMdd)-nodegoat-scan
 
 trigger:
   - master
-  
+
 jobs:
 - job: 'VercodeScan'
   displayName: 'Veracode NodeGoat Static Scan'
@@ -20,7 +20,7 @@ jobs:
         set -e
         git config --global user.email "scwveracode@securecodewarrior.com.au"
         git config --global user.name "SCWVeracode"
-        git clone https://$(GITHUBTOKEN)@github.com/vijaynscw/NodeGoat.git --branch master
+        git clone https://$(GITHUBTOKEN)@github.com/SecureCodeWarrior/NodeGoat-Test.git --branch master
     - task: Bash@3
       inputs:
         targetType: 'inline'
